@@ -31,6 +31,55 @@ import java.util.Map;
  */
 public class DeleteByMap extends AbstractMethod {
 
+    /**
+     *
+     * <pre>
+     * 逻辑删除：
+     *
+     * <script>
+     * UPDATE {tableName} SET {column}={logicDeleteValue}
+     * <where>
+     *     <if test="cm != null and !cm.isEmpty">
+     *         <foreach collection="cm" index="k" item="v" separator="AND">
+     *             <choose>
+     *                 <when test="v == null">
+     *                     ${k} IS NULL
+     *                 </when>
+     *                 <otherwise> ${k} = #{v} </otherwise>
+     *             </choose>
+     *         </foreach>
+     *     </if>
+     *     AND {column}={logicNotDeleteValue}
+     * </where>
+     * </script>
+     *
+     * </pre>
+     *
+     * <pre>
+     * 非逻辑删除：
+     *
+     * <script>
+     * DELETE FROM {tableName}
+     * <if test="cm != null and !cm.isEmpty">
+     *     <where>
+     *         <foreach collection="cm" index="k" item="v" separator="AND">
+     *             <choose>
+     *                 <when test="v == null">
+     *                     ${k} IS NULL
+     *                 </when>
+     *                 <otherwise> ${k} = #{v} </otherwise>
+     *             </choose>
+     *         </foreach>
+     *     </where>
+     * </if>
+     * </script>
+     *
+     * </pre>
+     * @param mapperClass mapper 接口
+     * @param modelClass  mapper 泛型
+     * @param tableInfo   数据库表反射信息
+     * @return
+     */
     @Override
     public MappedStatement injectMappedStatement(Class<?> mapperClass, Class<?> modelClass, TableInfo tableInfo) {
         String sql;

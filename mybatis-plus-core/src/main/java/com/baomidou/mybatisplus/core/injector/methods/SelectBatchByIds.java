@@ -30,6 +30,31 @@ import org.apache.ibatis.mapping.SqlSource;
  */
 public class SelectBatchByIds extends AbstractMethod {
 
+    /**
+     * <pre>
+     *
+     * <script>
+     * SELECT
+     *     <choose>
+     *         <when test="ew != null and ew.sqlSelect != null">
+     *             ${ew.sqlSelect}
+     *         </when>
+     *         <otherwise>${keyColumn as keyProperty,column1 as property1,column2 as property2}</otherwise>
+     *     </choose>
+     * FROM {tableName} WHERE {keyColumn} IN (
+     *     <foreach collection="coll" item="item" separator=",">
+     *         {sqlScript}
+     *     </foreach>
+     * ) [AND {logicDeleteColumn}={logicNotDeleteValue}]
+     * </script>
+     *
+     * </pre>
+     *
+     * @param mapperClass mapper 接口
+     * @param modelClass  mapper 泛型
+     * @param tableInfo   数据库表反射信息
+     * @return
+     */
     @Override
     public MappedStatement injectMappedStatement(Class<?> mapperClass, Class<?> modelClass, TableInfo tableInfo) {
         SqlMethod sqlMethod = SqlMethod.SELECT_BATCH_BY_IDS;

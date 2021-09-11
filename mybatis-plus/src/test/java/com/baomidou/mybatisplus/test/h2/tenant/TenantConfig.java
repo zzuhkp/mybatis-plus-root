@@ -1,4 +1,4 @@
-//package com.baomidou.mybatisplus.test.h2.tenant;
+package com.baomidou.mybatisplus.test.h2.tenant;//package com.baomidou.mybatisplus.test.h2.tenant;
 //
 //import com.baomidou.mybatisplus.core.MybatisConfiguration;
 //import com.baomidou.mybatisplus.core.executor.MybatisBatchExecutor;

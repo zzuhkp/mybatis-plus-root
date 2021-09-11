@@ -214,6 +214,8 @@ public class TableInfo implements Constants {
 
     /**
      * 获取主键的 select sql 片段
+     * <p>
+     * keyColumn as keyProperty
      *
      * @return sql 片段
      */
@@ -234,6 +236,8 @@ public class TableInfo implements Constants {
 
     /**
      * 获取包含主键及字段的 select sql 片段
+     * <p>
+     * keyColumn as keyProperty,column1 as property1,column2 as property2
      *
      * @return sql 片段
      */
@@ -267,6 +271,8 @@ public class TableInfo implements Constants {
      * 获取 insert 时候主键 sql 脚本片段
      * <p>insert into table (字段) values (值)</p>
      * <p>位于 "值" 部位</p>
+     * <p>
+     * #{keyProperty},
      *
      * @return sql 脚本片段
      */
@@ -285,6 +291,8 @@ public class TableInfo implements Constants {
      * 获取 insert 时候主键 sql 脚本片段
      * <p>insert into table (字段) values (值)</p>
      * <p>位于 "字段" 部位</p>
+     * <p>
+     * keyColumn,
      *
      * @return sql 脚本片段
      */
@@ -302,6 +310,8 @@ public class TableInfo implements Constants {
      * 获取所有 insert 时候插入值 sql 脚本片段
      * <p>insert into table (字段) values (值)</p>
      * <p>位于 "值" 部位</p>
+     * <p>
+     * #{keyProperty},#{propertyName,jdbcType={jdbcTypeName},javaType={javaTypeName},typeHandler={typeHandlerName},numericScale={numericScaleName}},
      *
      * <li> 自动选部位,根据规则会生成 if 标签 </li>
      *
@@ -317,6 +327,11 @@ public class TableInfo implements Constants {
      * 获取 insert 时候字段 sql 脚本片段
      * <p>insert into table (字段) values (值)</p>
      * <p>位于 "字段" 部位</p>
+     * <p>
+     * keyColumn,
+     * <if test="propertyName != null and propertyName != ''">
+     * {columnName},
+     * </if>
      *
      * <li> 自动选部位,根据规则会生成 if 标签 </li>
      *
@@ -324,12 +339,18 @@ public class TableInfo implements Constants {
      */
     public String getAllInsertSqlColumnMaybeIf(final String prefix) {
         final String newPrefix = prefix == null ? EMPTY : prefix;
+        // 主键 + 其他列名
         return getKeyInsertSqlColumn(true) + fieldList.stream().map(i -> i.getInsertSqlColumnMaybeIf(newPrefix))
             .filter(Objects::nonNull).collect(joining(NEWLINE));
     }
 
     /**
      * 获取所有的查询的 sql 片段
+     *
+     * <if test="keyProperty != null">keyColumn=#{keyProperty}</>
+     * <if test="propertyName != null and propertyName != ''">
+     * AND columnName=#{propertyName,jdbcType={jdbcTypeName},javaType={javaTypeName},typeHandler={typeHandlerName},numericScale={numericScaleName}}
+     * </if>
      *
      * @param ignoreLogicDelFiled 是否过滤掉逻辑删除字段
      * @param withId              是否包含 id 项
@@ -357,6 +378,9 @@ public class TableInfo implements Constants {
 
     /**
      * 获取所有的 sql set 片段
+     * <p>
+     * column=#{propertyName,jdbcType={jdbcTypeName},javaType={javaTypeName},typeHandler={typeHandlerName},numericScale={numericScaleName}},
+     * column=#{propertyName,jdbcType={jdbcTypeName},javaType={javaTypeName},typeHandler={typeHandlerName},numericScale={numericScaleName}},
      *
      * @param ignoreLogicDelFiled 是否过滤掉逻辑删除字段
      * @param prefix              前缀
@@ -376,6 +400,9 @@ public class TableInfo implements Constants {
     /**
      * 获取逻辑删除字段的 sql 脚本
      *
+     * isWhere: AND {column} IS NULL 或 AND {column}={logicNotDeleteValue}
+     * !isWhere: AND {column}= null 或 AND {column}={logicDeleteValue}
+     *
      * @param startWithAnd 是否以 and 开头
      * @param isWhere      是否需要的是逻辑删除值
      * @return sql 脚本
@@ -394,6 +421,9 @@ public class TableInfo implements Constants {
     /**
      * format logic delete SQL, can be overrided by subclass
      * github #1386
+     * <p>
+     * isWhere: {column} IS NULL 或 {column}={logicNotDeleteValue}
+     * !isWhere: {column}= null 或 {column}={logicDeleteValue}
      *
      * @param isWhere true: logicDeleteValue, false: logicNotDeleteValue
      * @return sql
@@ -420,6 +450,7 @@ public class TableInfo implements Constants {
      */
     void initResultMapIfNeed() {
         if (autoInitResultMap && null == resultMap) {
+            // {fullClassName}.mybatis-plus_{entitySimpleClassName}
             String id = currentNamespace + DOT + MYBATIS_PLUS + UNDERSCORE + entityType.getSimpleName();
             List<ResultMapping> resultMappings = new ArrayList<>();
             if (havePK()) {

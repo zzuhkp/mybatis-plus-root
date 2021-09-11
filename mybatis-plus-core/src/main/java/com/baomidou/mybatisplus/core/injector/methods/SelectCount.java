@@ -29,6 +29,104 @@ import org.apache.ibatis.mapping.SqlSource;
  */
 public class SelectCount extends AbstractMethod {
 
+    /**
+     * <pre>
+     * 包含逻辑删除字段：
+     *
+     * <script>
+     * <choose>
+     *     <when test="ew != null and ew.sqlFirst != null">
+     *         ${ew.sqlFirst}
+     *     </when>
+     *     <otherwise></otherwise>
+     * </choose>
+     * SELECT COUNT(
+     *     <choose>
+     *         <when test="ew != null and ew.sqlSelect != null">
+     *             ${ew.sqlSelect}
+     *         </when>
+     *         <otherwise>*</otherwise>
+     *     </choose>
+     *    ) FROM {tableName}
+     * <where>
+     *     <choose>
+     *         <when test="ew != null">
+     *             <if test="ew.entity != null">
+     *                 <if test="ew.entity.keyProperty != null">keyColumn=#{{ew.entity.keyProperty}}</if>
+     *                 <if test="ew.entity.propertyName != null and ew.entity.propertyName != ''">
+     *                     AND columnName=#{ew.entity.propertyName,jdbcType={jdbcTypeName},javaType={javaTypeName},typeHandler={typeHandlerName},numericScale={numericScaleName}}
+     *                 </if>
+     *             </if>
+     *             AND {logicDeleteColumn}={logicNotDeleteValue}
+     *             <if test="ew.sqlSegment != null and ew.sqlSegment != '' and ew.nonEmptyOfNormal">
+     *                 AND ${ew.sqlSegment}
+     *             </if>
+     *             <if test="ew.sqlSegment != null and ew.sqlSegment != null and ew.emptyOfNormal">
+     *                 ${ew.sqlSegment}
+     *             </if>
+     *         </when>
+     *         <otherwise>{logicDeleteColumn}={logicNotDeleteValue}</otherwise>
+     *     </choose>
+     * </where>
+     * <choose>
+     *     <when test="ew != null and ew.sqlComment != null">
+     *         ${ew.sqlComment}
+     *     </when>
+     *     <otherwise></otherwise>
+     * </choose>
+     * </script>
+     *
+     * </pre>
+     *
+     * <pre>
+     * 不包含逻辑删除字段：
+     *
+     * <script>
+     * <choose>
+     *     <when test="ew != null and ew.sqlFirst != null">
+     *         ${ew.sqlFirst}
+     *     </when>
+     *     <otherwise></otherwise>
+     * </choose>
+     * SELECT COUNT(
+     *     <choose>
+     *         <when test="ew != null and ew.sqlSelect != null">
+     *             ${ew.sqlSelect}
+     *         </when>
+     *         <otherwise>*</otherwise>
+     *     </choose>
+     *    ) FROM {tableName}
+     * <if test="ew != null">
+     *     <where>
+     *         <if test="ew.entity != null">
+     *             <if test="ew.entity.keyProperty != null">keyColumn=#{{ew.entity.keyProperty}}</if>
+     *             <if test="ew.entity.propertyName != null and ew.entity.propertyName != ''">
+     *                 AND columnName=#{ew.entity.propertyName,jdbcType={jdbcTypeName},javaType={javaTypeName},typeHandler={typeHandlerName},numericScale={numericScaleName}}
+     *             </if>
+     *         </if>
+     *         <if test="ew.sqlSegment != null and ew.sqlSegment != '' and ew.nonEmptyOfWhere">
+     *             <if test="ew.nonEmptyOfEntity and ew.nonEmptyOfNormal"> AND</if> ${ew.sqlSegment}
+     *         </if>
+     *     </where>
+     *     <if test="ew.sqlSegment != null and ew.sqlSegment != '' and ew.emptyOfWhere">
+     *         ${ew.sqlSegment}
+     *     </if>
+     * </if>
+     * <choose>
+     *     <when test="ew != null and ew.sqlComment != null">
+     *         ${ew.sqlComment}
+     *     </when>
+     *     <otherwise></otherwise>
+     * </choose>
+     * </script>
+     *
+     * </pre>
+     *
+     * @param mapperClass mapper 接口
+     * @param modelClass  mapper 泛型
+     * @param tableInfo   数据库表反射信息
+     * @return
+     */
     @Override
     public MappedStatement injectMappedStatement(Class<?> mapperClass, Class<?> modelClass, TableInfo tableInfo) {
         SqlMethod sqlMethod = SqlMethod.SELECT_COUNT;

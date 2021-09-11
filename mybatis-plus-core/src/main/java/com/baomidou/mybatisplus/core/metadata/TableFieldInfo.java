@@ -57,10 +57,14 @@ public class TableFieldInfo implements Constants {
     private final String property;
     /**
      * 属性表达式#{property}, 可以指定jdbcType, typeHandler等
+     * <p>
+     * propertyName,jdbcType={jdbcTypeName},javaType={javaTypeName},typeHandler={typeHandlerName},numericScale={numericScaleName}
      */
     private final String el;
     /**
      * jdbcType, typeHandler等部分
+     * <p>
+     * jdbcType={jdbcTypeName},javaType={javaTypeName},typeHandler={typeHandlerName},numericScale={numericScaleName}
      */
     private final String mapping;
     /**
@@ -100,89 +104,126 @@ public class TableFieldInfo implements Constants {
     private final FieldStrategy whereStrategy;
     /**
      * 是否是乐观锁字段
+     *
+     * @see Version
      */
     private final boolean version;
     /**
      * 是否进行 select 查询
      * <p>大字段可设置为 false 不加入 select 查询范围</p>
+     *
+     * @see TableField#select()
      */
     private boolean select = true;
     /**
      * 是否是逻辑删除字段
+     *
+     * @see TableLogic
      */
     private boolean logicDelete = false;
     /**
      * 逻辑删除值
+     *
+     * @see TableLogic#delval()
      */
     private String logicDeleteValue;
     /**
      * 逻辑未删除值
+     *
+     * @see TableLogic#value()
      */
     private String logicNotDeleteValue;
     /**
      * 字段 update set 部分注入
+     *
+     * @TableField(.. , update="%s+1") > update 表 set 字段=字段+1 where ...
+     * @see TableField#update()
      */
     private String update;
     /**
      * where 字段比较条件
+     *
+     * @see TableField#condition()
      */
     private String condition = SqlCondition.EQUAL;
     /**
      * 字段填充策略
+     *
+     * @see TableField#fill()
      */
     private FieldFill fieldFill = FieldFill.DEFAULT;
     /**
      * 表字段是否启用了插入填充
      *
+     * @see #fieldFill
      * @since 3.3.0
      */
     private boolean withInsertFill;
     /**
      * 表字段是否启用了更新填充
      *
+     * @see #fieldFill
      * @since 3.3.0
      */
     private boolean withUpdateFill;
     /**
      * 缓存 sql select
+     * <p>
+     * column as property
      */
     @Setter(AccessLevel.NONE)
     private String sqlSelect;
     /**
      * JDBC类型
      *
+     * @see TableField#jdbcType()
      * @since 3.1.2
      */
     private JdbcType jdbcType;
     /**
      * 类型处理器
      *
+     * @see TableField#typeHandler()
      * @since 3.1.2
      */
     private Class<? extends TypeHandler<?>> typeHandler;
 
     /**
-     *  是否存在OrderBy注解
+     * 是否存在OrderBy注解
+     *
+     * @see OrderBy
      */
     private boolean isOrderBy;
     /**
      * 排序类型
+     *
+     * @see OrderBy#isDesc()
      */
     private String orderByType;
     /**
      * 排序顺序
+     *
+     * @see OrderBy#sort()
      */
     private short orderBySort;
 
     /**
      * 全新的 存在 TableField 注解时使用的构造函数
+     *
+     * @param dbConfig
+     * @param tableInfo       表信息
+     * @param field           Model 类的字段
+     * @param tableField      字段上的 @TableField 注解
+     * @param reflector       反射工具
+     * @param existTableLogic Model 类中是否存在标记了 @TableLogic 的字段
+     * @param isOrderBy       Model 类中是否存在标记了 @OrderBy 的字段
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
     public TableFieldInfo(GlobalConfig.DbConfig dbConfig, TableInfo tableInfo, Field field, TableField tableField,
-                          Reflector reflector, boolean existTableLogic,boolean isOrderBy) {
-        this(dbConfig,tableInfo,field,tableField,reflector,existTableLogic);
+                          Reflector reflector, boolean existTableLogic, boolean isOrderBy) {
+        this(dbConfig, tableInfo, field, tableField, reflector, existTableLogic);
         this.isOrderBy = isOrderBy;
-        if(isOrderBy){
+        if (isOrderBy) {
             initOrderBy(field);
         }
     }
@@ -294,13 +335,14 @@ public class TableFieldInfo implements Constants {
      * 不存在 TableField 注解时, 使用的构造函数
      */
     public TableFieldInfo(GlobalConfig.DbConfig dbConfig, TableInfo tableInfo, Field field, Reflector reflector,
-                          boolean existTableLogic,boolean isOrderBy) {
-        this(dbConfig,tableInfo,field,reflector,existTableLogic);
+                          boolean existTableLogic, boolean isOrderBy) {
+        this(dbConfig, tableInfo, field, reflector, existTableLogic);
         this.isOrderBy = isOrderBy;
-        if(isOrderBy){
+        if (isOrderBy) {
             initOrderBy(field);
         }
     }
+
     /**
      * 不存在 TableField 注解时, 使用的构造函数
      */
@@ -351,15 +393,16 @@ public class TableFieldInfo implements Constants {
 
     /**
      * 排序初始化
+     *
      * @param field 字段
      */
-    private void initOrderBy(Field field){
+    private void initOrderBy(Field field) {
         OrderBy orderBy = field.getAnnotation(OrderBy.class);
         if (null != orderBy) {
             this.isOrderBy = true;
             this.orderBySort = orderBy.sort();
-            this.orderByType = orderBy.isDesc()?"desc":"asc";
-        }else{
+            this.orderByType = orderBy.isDesc() ? "desc" : "asc";
+        } else {
             this.isOrderBy = false;
         }
     }
@@ -402,7 +445,7 @@ public class TableFieldInfo implements Constants {
      *
      * <li> 不生成 if 标签 </li>
      *
-     * @return sql 脚本片段
+     * @return sql 脚本片段 #{propertyName,jdbcType={jdbcTypeName},javaType={javaTypeName},typeHandler={typeHandlerName},numericScale={numericScaleName}},
      */
     public String getInsertSqlProperty(final String prefix) {
         final String newPrefix = prefix == null ? EMPTY : prefix;
@@ -417,6 +460,10 @@ public class TableFieldInfo implements Constants {
      * <li> 根据规则会生成 if 标签 </li>
      *
      * @return sql 脚本片段
+     *
+     * <if test="propertyName != null and propertyName != ''">
+     * #{propertyName,jdbcType={jdbcTypeName},javaType={javaTypeName},typeHandler={typeHandlerName},numericScale={numericScaleName}},
+     * </if>
      */
     public String getInsertSqlPropertyMaybeIf(final String prefix) {
         final String newPrefix = prefix == null ? EMPTY : prefix;
@@ -435,6 +482,7 @@ public class TableFieldInfo implements Constants {
      * <li> 不生成 if 标签 </li>
      *
      * @return sql 脚本片段
+     * {columnName},
      */
     public String getInsertSqlColumn() {
         return column + COMMA;
@@ -448,6 +496,9 @@ public class TableFieldInfo implements Constants {
      * <li> 根据规则会生成 if 标签 </li>
      *
      * @return sql 脚本片段
+     * <if test="propertyName != null and propertyName != ''">
+     * {columnName},
+     * </if>
      */
     public String getInsertSqlColumnMaybeIf(final String prefix) {
         final String newPrefix = prefix == null ? EMPTY : prefix;
@@ -461,6 +512,8 @@ public class TableFieldInfo implements Constants {
     /**
      * 获取 set sql 片段
      *
+     * column=#{propertyName,jdbcType={jdbcTypeName},javaType={javaTypeName},typeHandler={typeHandlerName},numericScale={numericScaleName}},
+     *
      * @param prefix 前缀
      * @return sql 脚本片段
      */
@@ -470,6 +523,10 @@ public class TableFieldInfo implements Constants {
 
     /**
      * 获取 set sql 片段
+     *
+     * <if test="propertyName != null and paramName != ''">
+     * column=#{propertyName,jdbcType={jdbcTypeName},javaType={javaTypeName},typeHandler={typeHandlerName},numericScale={numericScaleName}},
+     * </if>
      *
      * @param ignoreIf 忽略 IF 包裹
      * @param prefix   前缀
@@ -501,6 +558,10 @@ public class TableFieldInfo implements Constants {
 
     /**
      * 获取 查询的 sql 片段
+     *
+     * <if test="propertyName != null and propertyName != ''">
+     * AND columnName=#{propertyName,jdbcType={jdbcTypeName},javaType={javaTypeName},typeHandler={typeHandlerName},numericScale={numericScaleName}}
+     * </if>
      *
      * @param prefix 前缀
      * @return sql 脚本片段
@@ -537,6 +598,13 @@ public class TableFieldInfo implements Constants {
         return builder.build();
     }
 
+    /**
+     * <if test="alias != null and propertyName != null and propertyName != ''">AND {columnName}=#{MP_OPTLOCK_VERSION_ORIGINAL}</if>
+     *
+     * @param alias
+     * @param prefix
+     * @return
+     */
     public String getVersionOli(final String alias, final String prefix) {
         final String oli = " AND " + column + EQUALS + SqlScriptUtils.safeParam(MP_OPTLOCK_VERSION_ORIGINAL);
         final String ognlStr = convertIfProperty(prefix, property);

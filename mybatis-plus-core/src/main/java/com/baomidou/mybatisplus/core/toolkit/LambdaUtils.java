@@ -38,7 +38,7 @@ import static java.util.Locale.ENGLISH;
 public final class LambdaUtils {
 
     /**
-     * 字段映射
+     * 字段映射 entitySimpleClassName -> {COLUMN:columnCache}
      */
     private static final Map<String, Map<String, ColumnCache>> COLUMN_CACHE_MAP = new ConcurrentHashMap<>();
 

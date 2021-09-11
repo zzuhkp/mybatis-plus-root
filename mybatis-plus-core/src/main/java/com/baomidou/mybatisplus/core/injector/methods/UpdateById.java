@@ -29,6 +29,26 @@ import org.apache.ibatis.mapping.SqlSource;
  */
 public class UpdateById extends AbstractMethod {
 
+    /**
+     * <pre>
+     *
+     * <script>
+     * UPDATE {tableName}
+     *     <set>
+     *         column=#{et.propertyName,jdbcType={jdbcTypeName},javaType={javaTypeName},typeHandler={typeHandlerName},numericScale={numericScaleName}},
+     *     </set>
+     * WHERE {keyColumn}=#{et.keyProperty}
+     * [<if test="ew != null and ew.propertyName != null and ew.propertyName != ''">AND {columnName}=#{MP_OPTLOCK_VERSION_ORIGINAL}</if>]
+     * [AND {column}={logicNotDeleteValue}]
+     * </script>
+     *
+     * </pre>
+     *
+     * @param mapperClass mapper 接口
+     * @param modelClass  mapper 泛型
+     * @param tableInfo   数据库表反射信息
+     * @return
+     */
     @Override
     public MappedStatement injectMappedStatement(Class<?> mapperClass, Class<?> modelClass, TableInfo tableInfo) {
         SqlMethod sqlMethod = SqlMethod.UPDATE_BY_ID;

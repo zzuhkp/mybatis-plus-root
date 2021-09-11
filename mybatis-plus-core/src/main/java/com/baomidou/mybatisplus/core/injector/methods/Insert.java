@@ -37,6 +37,30 @@ import org.apache.ibatis.mapping.SqlSource;
 @SuppressWarnings("serial")
 public class Insert extends AbstractMethod {
 
+    /**
+     * <pre>
+     *
+     * <script>
+     * INSERT INTO {tableName}
+     *     <trim prefix="(" suffix=")" suffixOverrides=",">
+     *         keyColumn,
+     *         <if test="propertyName != null and propertyName != ''">
+     *             {columnName},
+     *         </if>
+     *     </trim>
+     * VALUES
+     *     <trim prefix="(" suffix=")" suffixOverrides=",">
+     *         #{keyProperty},#{propertyName,jdbcType={jdbcTypeName},javaType={javaTypeName},typeHandler={typeHandlerName},numericScale={numericScaleName}},
+     *     </trim>
+     * </script>
+     *
+     * </pre>
+     *
+     * @param mapperClass mapper 接口
+     * @param modelClass  mapper 泛型
+     * @param tableInfo   数据库表反射信息
+     * @return
+     */
     @Override
     public MappedStatement injectMappedStatement(Class<?> mapperClass, Class<?> modelClass, TableInfo tableInfo) {
         KeyGenerator keyGenerator = new NoKeyGenerator();

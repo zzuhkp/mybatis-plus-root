@@ -34,6 +34,8 @@ public abstract class SqlScriptUtils implements Constants {
     /**
      * <p>
      * 获取 带 if 标签的脚本
+     *
+     * <if test="{ifTest}">{newLine}{sqlScript}{newLine}</if>
      * </p>
      *
      * @param sqlScript sql 脚本片段
@@ -50,6 +52,11 @@ public abstract class SqlScriptUtils implements Constants {
     /**
      * <p>
      * 获取 带 trim 标签的脚本
+     *
+     * <trim prefix="{prefix}" suffix="{suffix}" prefixOverrides="{prefixOverrides}" suffixOverrides="{suffixOverrides}">
+     * {sqlScript}
+     * </trim>
+     *
      * </p>
      *
      * @param sqlScript       sql 脚本片段
@@ -80,6 +87,13 @@ public abstract class SqlScriptUtils implements Constants {
     /**
      * <p>
      * 生成 choose 标签的脚本
+     *
+     * <choose>
+     * <when test="{whenTest}">
+     * {whenSqlScript}
+     * </when>
+     * <otherwise>{otherwise}</otherwise>
+     * </choose>
      * </p>
      *
      * @param whenTest  when 内 test 的内容
@@ -97,6 +111,11 @@ public abstract class SqlScriptUtils implements Constants {
     /**
      * <p>
      * 生成 foreach 标签的脚本
+     *
+     * <foreach collection="{collection}" index="{index}" item="{item}" separator="{separator}">
+     * {sqlScript}
+     * </foreach>
+     *
      * </p>
      *
      * @param sqlScript  foreach 内部的 sql 脚本
@@ -127,6 +146,11 @@ public abstract class SqlScriptUtils implements Constants {
     /**
      * <p>
      * 生成 where 标签的脚本
+     *
+     * <where>
+     * {sqlScript}
+     * <where/>
+     *
      * </p>
      *
      * @param sqlScript where 内部的 sql 脚本
@@ -139,6 +163,11 @@ public abstract class SqlScriptUtils implements Constants {
     /**
      * <p>
      * 生成 set 标签的脚本
+     *
+     * <set>
+     * {sqlScript}
+     * <set/>
+     *
      * </p>
      *
      * @param sqlScript set 内部的 sql 脚本
@@ -151,6 +180,9 @@ public abstract class SqlScriptUtils implements Constants {
     /**
      * <p>
      * 安全入参:  #{入参}
+     * <p>
+     * #{{param}}
+     *
      * </p>
      *
      * @param param 入参
@@ -163,6 +195,9 @@ public abstract class SqlScriptUtils implements Constants {
     /**
      * <p>
      * 安全入参:  #{入参,mapping}
+     * <p>
+     * #{{param},{mapping}}
+     *
      * </p>
      *
      * @param param   入参
@@ -180,6 +215,9 @@ public abstract class SqlScriptUtils implements Constants {
     /**
      * <p>
      * 非安全入参:  ${入参}
+     * <p>
+     * ${{param}}
+     *
      * </p>
      *
      * @param param 入参
@@ -189,6 +227,12 @@ public abstract class SqlScriptUtils implements Constants {
         return DOLLAR_LEFT_BRACE + param + RIGHT_BRACE;
     }
 
+    /**
+     * typehandler={typeHandlerName}
+     *
+     * @param typeHandler
+     * @return
+     */
     public static String mappingTypeHandler(Class<? extends TypeHandler<?>> typeHandler) {
         if (typeHandler != null) {
             return "typeHandler=" + typeHandler.getName();
@@ -196,6 +240,12 @@ public abstract class SqlScriptUtils implements Constants {
         return null;
     }
 
+    /**
+     * jdbcType={jdbcTypeName}
+     *
+     * @param jdbcType
+     * @return
+     */
     public static String mappingJdbcType(JdbcType jdbcType) {
         if (jdbcType != null) {
             return "jdbcType=" + jdbcType.name();
@@ -203,6 +253,12 @@ public abstract class SqlScriptUtils implements Constants {
         return null;
     }
 
+    /**
+     * numericScale={numericScale}
+     *
+     * @param numericScale
+     * @return
+     */
     public static String mappingNumericScale(Integer numericScale) {
         if (numericScale != null) {
             return "numericScale=" + numericScale;
@@ -210,6 +266,14 @@ public abstract class SqlScriptUtils implements Constants {
         return null;
     }
 
+    /**
+     * typeHandler={typeHandlerName},jdbcType={jdbcTypeName},numericScale={numericScale}
+     *
+     * @param typeHandler
+     * @param jdbcType
+     * @param numericScale
+     * @return
+     */
     public static String convertParamMapping(Class<? extends TypeHandler<?>> typeHandler, JdbcType jdbcType, Integer numericScale) {
         if (typeHandler == null && jdbcType == null && numericScale == null) {
             return null;

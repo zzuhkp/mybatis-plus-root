@@ -79,6 +79,8 @@ public abstract class AbstractMethod implements Constants {
 
     /**
      * SQL 更新 set 语句
+     * <p>
+     * SET {column}={logicDeleteValue}
      *
      * @param table 表信息
      * @return sql set 片段
@@ -89,6 +91,13 @@ public abstract class AbstractMethod implements Constants {
 
     /**
      * SQL 更新 set 语句
+     * <p>
+     * <set>
+     * <if test="alias != null">
+     * column=#{propertyName,jdbcType={jdbcTypeName},javaType={javaTypeName},typeHandler={typeHandlerName},numericScale={numericScaleName}},
+     * </if>
+     * <if test="ew != null and ew.sqlSet != null">${ew.sqlSet}</if>
+     * </set>
      *
      * @param logic  是否逻辑删除注入器
      * @param ew     是否存在 UpdateWrapper 条件
@@ -115,6 +124,13 @@ public abstract class AbstractMethod implements Constants {
     /**
      * SQL 注释
      *
+     * <choose>
+     *     <when test="ew != null and ew.sqlComment != null">
+     *         ${ew.sqlComment}
+     *     </when>
+     *     <otherwise></otherwise>
+     * </choose>
+     *
      * @return sql
      */
     protected String sqlComment() {
@@ -125,6 +141,13 @@ public abstract class AbstractMethod implements Constants {
     /**
      * SQL 注释
      *
+     * <choose>
+     *     <when test="ew != null and ew.sqlFirst != null">
+     *         ${ew.sqlFirst}
+     *     </when>
+     *     <otherwise></otherwise>
+     * </choose>
+     *
      * @return sql
      */
     protected String sqlFirst() {
@@ -134,6 +157,13 @@ public abstract class AbstractMethod implements Constants {
 
     /**
      * SQL 查询所有表字段
+     *
+     * <choose>
+     *     <when test="ew != null and ew.sqlSelect != null">
+     *         ${ew.sqlSelect}
+     *     </when>
+     *     <otherwise>${keyColumn as keyProperty,column1 as property1,column2 as property2}</otherwise>
+     * </choose>
      *
      * @param table        表信息
      * @param queryWrapper 是否为使用 queryWrapper 查询
@@ -156,6 +186,13 @@ public abstract class AbstractMethod implements Constants {
     /**
      * SQL 查询记录行数
      *
+     * <choose>
+     * <when test="ew != null and ew.sqlSelect != null">
+     * ${ew.sqlSelect}
+     * </when>
+     * <otherwise>*</otherwise>
+     * </choose>
+     *
      * @return count sql 脚本
      */
     protected String sqlCount() {
@@ -166,6 +203,13 @@ public abstract class AbstractMethod implements Constants {
     /**
      * SQL 设置selectObj sql select
      *
+     * <choose>
+     *     <when test="ew != null and ew.sqlSelect != null">
+     *         ${ew.sqlSelect}
+     *     </when>
+     *     <otherwise>keyColumn as keyProperty,column1 as property1,column2 as property2</otherwise>
+     * </choose>
+     *
      * @param table 表信息
      */
     protected String sqlSelectObjsColumns(TableInfo table) {
@@ -175,6 +219,35 @@ public abstract class AbstractMethod implements Constants {
 
     /**
      * SQL map 查询条件
+     * <p>
+     * 逻辑删除：
+     * <where>
+     * <if test="cm != null and !cm.isEmpty">
+     * <foreach collection="cm" index="k" item="v" separator="AND">
+     * <choose>
+     * <when test="v == null">
+     * ${k} IS NULL
+     * </when>
+     * <otherwise> ${k} = #{v} </otherwise>
+     * </choose>
+     * </foreach>
+     * </if>
+     * AND {column}={logicNotDeleteValue}
+     * </where>
+     * <p>
+     * 非逻辑删除：
+     * <if test="cm != null and !cm.isEmpty">
+     * <where>
+     * <foreach collection="cm" index="k" item="v" separator="AND">
+     * <choose>
+     * <when test="v == null">
+     * ${k} IS NULL
+     * </when>
+     * <otherwise> ${k} = #{v} </otherwise>
+     * </choose>
+     * </foreach>
+     * </where>
+     * </if>
      */
     protected String sqlWhereByMap(TableInfo table) {
         if (table.isWithLogicDelete()) {
@@ -197,8 +270,53 @@ public abstract class AbstractMethod implements Constants {
         }
     }
 
+
     /**
      * EntityWrapper方式获取select where
+     *
+     * <pre>
+     * 存在逻辑删除字段：
+     * <where>
+     *     <choose>
+     *         <when test="ew != null">
+     *             <if test="ew.entity != null">
+     *                 <if test="ew.entity.keyProperty != null">keyColumn=#{{ew.entity.keyProperty}}</if>
+     *                 <if test="ew.entity.propertyName != null and ew.entity.propertyName != ''">
+     *                     AND columnName=#{ew.entity.propertyName,jdbcType={jdbcTypeName},javaType={javaTypeName},typeHandler={typeHandlerName},numericScale={numericScaleName}}
+     *                 </if>
+     *             </if>
+     *             AND {logicDeleteColumn}={logicNotDeleteValue}
+     *             <if test="ew.sqlSegment != null and ew.sqlSegment != '' and ew.nonEmptyOfNormal">
+     *                 AND ${ew.sqlSegment}
+     *             </if>
+     *             <if test="ew.sqlSegment != null and ew.sqlSegment != null and ew.emptyOfNormal">
+     *                 ${ew.sqlSegment}
+     *             </if>
+     *         </when>
+     *         <otherwise>{logicDeleteColumn}={logicNotDeleteValue}</otherwise>
+     *     </choose>
+     * </where>
+     *
+     *
+     * 不存在逻辑删除字段：
+     * <if test="ew != null">
+     *     <where>
+     *         <if test="ew.entity != null">
+     *             <if test="ew.entity.keyProperty != null">keyColumn=#{{ew.entity.keyProperty}}</if>
+     *             <if test="ew.entity.propertyName != null and ew.entity.propertyName != ''">
+     *                 AND columnName=#{ew.entity.propertyName,jdbcType={jdbcTypeName},javaType={javaTypeName},typeHandler={typeHandlerName},numericScale={numericScaleName}}
+     *             </if>
+     *         </if>
+     *         <if test="ew.sqlSegment != null and ew.sqlSegment != '' and ew.nonEmptyOfWhere">
+     *             <if test="ew.nonEmptyOfEntity and ew.nonEmptyOfNormal"> AND</if> ${ew.sqlSegment}
+     *         </if>
+     *     </where>
+     *     <if test="ew.sqlSegment != null and ew.sqlSegment != '' and ew.emptyOfWhere">
+     *         ${ew.sqlSegment}
+     *     </if>
+     * </if>
+     *
+     * </pre>
      *
      * @param newLine 是否提到下一行
      * @param table   表信息
@@ -238,6 +356,14 @@ public abstract class AbstractMethod implements Constants {
         }
     }
 
+    /**
+     * <if test="ew == null or ew.expression == null or ew.expression.orderBy == null or ew.expression.orderBy.size() == 0">
+     *     ORDER BY {column1} asc|desc,{column2} asc|desc
+     * </if>
+     *
+     * @param tableInfo
+     * @return
+     */
     protected String sqlOrderBy(TableInfo tableInfo) {
         /* 不存在排序字段，直接返回空 */
         List<TableFieldInfo> orderByFields = tableInfo.getOrderByFields();
@@ -268,6 +394,8 @@ public abstract class AbstractMethod implements Constants {
 
     /**
      * 获取乐观锁相关
+     *
+     * <if test="ew != null and ew.propertyName != null and ew.propertyName != ''">AND {columnName}=#{MP_OPTLOCK_VERSION_ORIGINAL}</if>
      *
      * @param tableInfo 表信息
      * @return String

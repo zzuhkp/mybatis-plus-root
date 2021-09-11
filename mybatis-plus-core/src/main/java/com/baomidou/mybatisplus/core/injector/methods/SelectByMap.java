@@ -31,6 +31,56 @@ import java.util.Map;
  */
 public class SelectByMap extends AbstractMethod {
 
+    /**
+     * <pre>
+     * 包含逻辑删除字段：
+     *
+     * <script>
+     * SELECT ${keyColumn as keyProperty,column1 as property1,column2 as property2}
+     * FROM {tableName}
+     * <where>
+     *     <if test="cm != null and !cm.isEmpty">
+     *         <foreach collection="cm" index="k" item="v" separator="AND">
+     *             <choose>
+     *                 <when test="v == null">
+     *                     ${k} IS NULL
+     *                 </when>
+     *                 <otherwise> ${k} = #{v} </otherwise>
+     *            </choose>
+     *         </foreach>
+     *     </if>
+     *     AND {column}={logicNotDeleteValue}
+     * </where>
+     * </script>
+     * </pre>
+     *
+     * <pre>
+     * 不包含逻辑删除字段：
+     *
+     * <script>
+     * SELECT ${keyColumn as keyProperty,column1 as property1,column2 as property2}
+     * FROM {tableName}
+     * <if test="cm != null and !cm.isEmpty">
+     *     <where>
+     *         <foreach collection="cm" index="k" item="v" separator="AND">
+     *             <choose>
+     *                 <when test="v == null">
+     *                     ${k} IS NULL
+     *                 </when>
+     *                 <otherwise> ${k} = #{v} </otherwise>
+     *             </choose>
+     *         </foreach>
+     *     </where>
+     * </if>
+     *
+     * </script>
+     * </pre>
+     *
+     * @param mapperClass mapper 接口
+     * @param modelClass  mapper 泛型
+     * @param tableInfo   数据库表反射信息
+     * @return
+     */
     @Override
     public MappedStatement injectMappedStatement(Class<?> mapperClass, Class<?> modelClass, TableInfo tableInfo) {
         SqlMethod sqlMethod = SqlMethod.SELECT_BY_MAP;

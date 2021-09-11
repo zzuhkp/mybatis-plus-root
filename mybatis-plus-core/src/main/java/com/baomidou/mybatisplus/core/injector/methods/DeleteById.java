@@ -29,6 +29,30 @@ import org.apache.ibatis.mapping.SqlSource;
  */
 public class DeleteById extends AbstractMethod {
 
+    /**
+     * <pre>
+     * 逻辑删除：
+     *
+     * <script>
+     * UPDATE {tableName} SET {logicDeleteColumn}={logicDeleteValue} WHERE {keyColumn}=#{keyProperty} AND {logicDeleteColumn}={logicNotDeleteValue}
+     * </script>
+     *
+     * </pre>
+     *
+     * <pre>
+     * 非逻辑删除：
+     *
+     * <script>
+     * DELETE FROM {tableName} WHERE {keyColumn}=#{keyProperty}
+     * </script>
+     *
+     * </pre>
+     *
+     * @param mapperClass mapper 接口
+     * @param modelClass  mapper 泛型
+     * @param tableInfo   数据库表反射信息
+     * @return
+     */
     @Override
     public MappedStatement injectMappedStatement(Class<?> mapperClass, Class<?> modelClass, TableInfo tableInfo) {
         String sql;

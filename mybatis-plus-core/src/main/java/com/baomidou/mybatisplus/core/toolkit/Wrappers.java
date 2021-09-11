@@ -164,7 +164,7 @@ public final class Wrappers {
      * 一个空的QueryWrapper子类该类不包含任何条件
      *
      * @param <T>
-     * @see com.baomidou.mybatisplus.core.conditions.query.QueryWrapper
+     * @see QueryWrapper
      */
     private static class EmptyWrapper<T> extends QueryWrapper<T> {
 

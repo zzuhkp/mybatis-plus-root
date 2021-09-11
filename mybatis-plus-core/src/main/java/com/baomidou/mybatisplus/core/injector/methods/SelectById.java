@@ -30,6 +30,24 @@ import org.apache.ibatis.scripting.defaults.RawSqlSource;
  */
 public class SelectById extends AbstractMethod {
 
+    /**
+     * <pre>
+     *
+     * SELECT
+     * <choose>
+     * <when test="ew != null and ew.sqlSelect != null">
+     * ${ew.sqlSelect}
+     * </when>
+     * <otherwise>${keyColumn as keyProperty,column1 as property1,column2 as property2}</otherwise>
+     * </choose>
+     * FROM {tableName} WHERE {keyColumn}=#{keyProperty} [AND {logicDeleteColumn}={logicNotDeleteValue}]
+     * </pre>
+     *
+     * @param mapperClass mapper 接口
+     * @param modelClass  mapper 泛型
+     * @param tableInfo   数据库表反射信息
+     * @return
+     */
     @Override
     public MappedStatement injectMappedStatement(Class<?> mapperClass, Class<?> modelClass, TableInfo tableInfo) {
         SqlMethod sqlMethod = SqlMethod.SELECT_BY_ID;
