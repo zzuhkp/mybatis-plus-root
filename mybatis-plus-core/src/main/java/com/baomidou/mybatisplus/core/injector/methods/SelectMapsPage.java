@@ -63,7 +63,7 @@ public class SelectMapsPage extends AbstractMethod {
      *             <if test="ew.sqlSegment != null and ew.sqlSegment != '' and ew.nonEmptyOfNormal">
      *                 AND ${ew.sqlSegment}
      *             </if>
-     *             <if test="ew.sqlSegment != null and ew.sqlSegment != null and ew.emptyOfNormal">
+     *             <if test="ew.sqlSegment != null and ew.sqlSegment != '' and ew.emptyOfNormal">
      *                 ${ew.sqlSegment}
      *             </if>
      *         </when>

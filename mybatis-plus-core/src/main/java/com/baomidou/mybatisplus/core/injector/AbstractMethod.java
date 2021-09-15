@@ -80,7 +80,7 @@ public abstract class AbstractMethod implements Constants {
     /**
      * SQL 更新 set 语句
      * <p>
-     * SET {column}={logicDeleteValue}
+     * SET {logicDeleteColumn}={logicDeleteValue}
      *
      * @param table 表信息
      * @return sql set 片段
@@ -286,10 +286,13 @@ public abstract class AbstractMethod implements Constants {
      *                 </if>
      *             </if>
      *             AND {logicDeleteColumn}={logicNotDeleteValue}
+     *             // 只要存在 where sql 片段，不管普通的条件是否为空，都设置 where sql 片段
      *             <if test="ew.sqlSegment != null and ew.sqlSegment != '' and ew.nonEmptyOfNormal">
+     *                 //  存在普通的条件，使用 AND 和前面的条件进行拼接
      *                 AND ${ew.sqlSegment}
      *             </if>
-     *             <if test="ew.sqlSegment != null and ew.sqlSegment != null and ew.emptyOfNormal">
+     *             <if test="ew.sqlSegment != null and ew.sqlSegment != '' and ew.emptyOfNormal">
+     *                 // 普通条件结束，拼接其他片段
      *                 ${ew.sqlSegment}
      *             </if>
      *         </when>
@@ -308,6 +311,7 @@ public abstract class AbstractMethod implements Constants {
      *             </if>
      *         </if>
      *         <if test="ew.sqlSegment != null and ew.sqlSegment != '' and ew.nonEmptyOfWhere">
+     *             // entity 条件不为空，普通的 where 也不为空，在普通的 where 条件前拼接 AND，和上面的逻辑删除逻辑类似
      *             <if test="ew.nonEmptyOfEntity and ew.nonEmptyOfNormal"> AND</if> ${ew.sqlSegment}
      *         </if>
      *     </where>

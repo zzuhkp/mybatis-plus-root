@@ -23,6 +23,7 @@ import java.util.function.Consumer;
  * <p>嵌套</p>
  * <li>泛型 Param 是具体需要运行函数的类(也是 wrapper 的子类)</li>
  *
+ * @param <Children> Wrapper 子类
  * @author hubin miemie HCL
  * @since 2017-05-26
  */

@@ -43,7 +43,7 @@ public class SelectBatchByIds extends AbstractMethod {
      *     </choose>
      * FROM {tableName} WHERE {keyColumn} IN (
      *     <foreach collection="coll" item="item" separator=",">
-     *         {sqlScript}
+     *         #{item}
      *     </foreach>
      * ) [AND {logicDeleteColumn}={logicNotDeleteValue}]
      * </script>

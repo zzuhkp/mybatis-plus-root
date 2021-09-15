@@ -33,6 +33,9 @@ import java.util.List;
 @SuppressWarnings("serial")
 public class MergeSegments implements ISqlSegment {
 
+    /**
+     * 普通的 where 条件
+     */
     private final NormalSegmentList normal = new NormalSegmentList();
     private final GroupBySegmentList groupBy = new GroupBySegmentList();
     private final HavingSegmentList having = new HavingSegmentList();

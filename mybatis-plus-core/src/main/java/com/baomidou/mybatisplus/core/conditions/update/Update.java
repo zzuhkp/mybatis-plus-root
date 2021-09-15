@@ -20,6 +20,8 @@ import java.io.Serializable;
 /**
  * @author miemie
  * @since 2018-12-12
+ * @param <Children> 子类
+ * @param <R> 字段名
  */
 public interface Update<Children, R> extends Serializable {
 

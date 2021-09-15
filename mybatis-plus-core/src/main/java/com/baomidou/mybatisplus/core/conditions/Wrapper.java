@@ -27,6 +27,7 @@ import java.util.Objects;
 /**
  * 条件构造抽象类
  *
+ * @param <T> entity
  * @author hubin
  * @since 2018-05-25
  */

@@ -36,6 +36,7 @@ public class Update extends AbstractMethod {
      * <script>
      * UPDATE {tableName}
      *     <set>
+     *         // 拼接 entity 和 wrapper 中的 set 字段值
      *         <if test="et != null">
      *             column=#{et.propertyName,jdbcType={jdbcTypeName},javaType={javaTypeName},typeHandler={typeHandlerName},numericScale={numericScaleName}},
      *         </if>
@@ -54,7 +55,7 @@ public class Update extends AbstractMethod {
      *                 <if test="ew.sqlSegment != null and ew.sqlSegment != '' and ew.nonEmptyOfNormal">
      *                     AND ${ew.sqlSegment}
      *                 </if>
-     *                 <if test="ew.sqlSegment != null and ew.sqlSegment != null and ew.emptyOfNormal">
+     *                 <if test="ew.sqlSegment != null and ew.sqlSegment != '' and ew.emptyOfNormal">
      *                     ${ew.sqlSegment}
      *                 </if>
      *             </when>

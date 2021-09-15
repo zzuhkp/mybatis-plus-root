@@ -399,12 +399,17 @@ public class TableInfo implements Constants {
 
     /**
      * 获取逻辑删除字段的 sql 脚本
-     *
+     * <p>
      * isWhere: AND {column} IS NULL 或 AND {column}={logicNotDeleteValue}
      * !isWhere: AND {column}= null 或 AND {column}={logicDeleteValue}
      *
+     * 作为 where 条件时 逻辑删除字段=逻辑未删除值
+     * 作为 set 字段时 逻辑删除字段=逻辑删除值
+     *
      * @param startWithAnd 是否以 and 开头
      * @param isWhere      是否需要的是逻辑删除值
+     *                     true : {logicDeleteColumn} IS NULL | {logicDeleteColumn}={logicNotDeleteValue}
+     *                     false : {logicDeleteColumn}=null | {logicDeleteColumn}={logicDeleteValue}
      * @return sql 脚本
      */
     public String getLogicDeleteSql(boolean startWithAnd, boolean isWhere) {
@@ -421,11 +426,9 @@ public class TableInfo implements Constants {
     /**
      * format logic delete SQL, can be overrided by subclass
      * github #1386
-     * <p>
-     * isWhere: {column} IS NULL 或 {column}={logicNotDeleteValue}
-     * !isWhere: {column}= null 或 {column}={logicDeleteValue}
      *
-     * @param isWhere true: logicDeleteValue, false: logicNotDeleteValue
+     * @param isWhere true : {logicDeleteColumn} IS NULL | {logicDeleteColumn}={logicNotDeleteValue}
+     *                false : {logicDeleteColumn}=null | {logicDeleteColumn}={logicDeleteValue}
      * @return sql
      */
     private String formatLogicDeleteSql(boolean isWhere) {

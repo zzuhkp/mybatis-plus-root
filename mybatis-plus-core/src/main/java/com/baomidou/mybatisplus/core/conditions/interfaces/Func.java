@@ -22,6 +22,8 @@ import java.util.function.Consumer;
 /**
  * 查询条件封装
  *
+ * @param <Children> Wrapper 子类
+ * @param <R>        字段名
  * @author hubin miemie HCL
  * @since 2017-05-26
  */

@@ -42,6 +42,9 @@ import static java.util.stream.Collectors.joining;
 /**
  * 查询条件封装
  *
+ * @param <T>        entity
+ * @param <R>        字段名
+ * @param <Children> AbstractWrapper 子类
  * @author hubin miemie HCL
  * @since 2017-05-26
  */
@@ -439,11 +442,12 @@ public abstract class AbstractWrapper<T, R, Children extends AbstractWrapper<T, 
      *
      * @param mapping 例如: "javaType=int,jdbcType=NUMERIC,typeHandler=xxx.xxx.MyTypeHandler" 这种
      * @param param   参数
-     * @return value
+     * @return value #{ew.paramNameValuePairs.MPGENVAL{number},javaType=int,jdbcType=NUMERIC,typeHandler=xxx.xxx.MyTypeHandler}
      */
     protected final String formatParam(String mapping, Object param) {
         final String genParamName = Constants.WRAPPER_PARAM + paramNameSeq.incrementAndGet();
         final String paramStr = getParamAlias() + Constants.WRAPPER_PARAM_MIDDLE + genParamName;
+        // MPGENVAL{number} -> param
         paramNameValuePairs.put(genParamName, param);
         return SqlScriptUtils.safeParam(paramStr, mapping);
     }

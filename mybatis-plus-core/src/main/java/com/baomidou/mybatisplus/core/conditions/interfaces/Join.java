@@ -23,6 +23,7 @@ import java.io.Serializable;
  *
  * @author hubin miemie HCL
  * @since 2017-05-26
+ * @param <Children> Wrapper 子类
  */
 public interface Join<Children> extends Serializable {
 
